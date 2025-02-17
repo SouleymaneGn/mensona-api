@@ -2,8 +2,6 @@
 
 ## 🚀 Introduction
 **AuthNestAPI** est une API d'authentification construit avec **NestJS**, **Prisma**,**JWT** et **swagger**. Il permet aux utilisateurs de s'inscrire, de se connecter et de gérer la vérification et la réinitialisation de mot de passe avec un système de code de validation sécurisé.
-=======
-**AuthNestAPI ** est une api d'authentification construit avec **NestJS**, **Prisma**, **JWT** et swagger. Il permet aux utilisateurs de s'inscrire, de se connecter et de gérer la vérification et la réinitialisation de mot de passe avec un système de code de validation sécurisé.
 
 ## 📌 Fonctionnalités
 - **Inscription** d'un utilisateur avec envoi d'un code de validation
