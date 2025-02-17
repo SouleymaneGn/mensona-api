@@ -1,0 +1,4 @@
+reset_code : 
+verication email 
+generation_code 
+  suprimer modifier le code existant suivant le type 
