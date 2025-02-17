@@ -22,7 +22,7 @@
 
 ### 1️⃣ **Cloner le projet**
 ```sh
-git clone https://github.com/votre-repo/auth-service.git
+git clone https://github.com/souleymane19/AuthNestAPI.git
 cd auth-service
 ```
 
