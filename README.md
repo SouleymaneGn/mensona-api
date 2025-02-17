@@ -112,8 +112,8 @@ L'API sera disponible sur `http://localhost:3000`
 
 ## 🖼️ Capture de l'interface Swagger
 
-![Swagger Interface](./images/interface.png)
-<img src="./images/swagger-interface.png" alt="Swagger Interface" width="600"/>
+![Swagger Interface](./src/assets/images/interface.png)
+<img src="./src/assets/images/interface.png" alt="Swagger Interface" width="600"/>
 
 ## 🔒 Gestion de l'expiration des codes
 - Chaque code généré est valide **30 minutes**.
