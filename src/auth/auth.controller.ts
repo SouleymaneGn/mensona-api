@@ -31,7 +31,11 @@ export class AuthController {
     
     return this.authService.validateAccount(validateAccountDto.code)
   }
-  @UseGuards(AuthGuard)
+  @Get("request-validation-email")
+  requestValidationEmail(@Param('email') email: string){
+  return this.authService.requestValidationCode(email)
+  }
+  // @UseGuards(AuthGuard)
   @Get('request-reset-password')
    requestReset(@Param('email') email: string) {
     return this.authService.requestPasswordReset(email);

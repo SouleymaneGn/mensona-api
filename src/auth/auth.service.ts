@@ -4,6 +4,9 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ResetPasswordDto } from './dto/reset-password';
 import * as bcrypt from 'bcrypt';
+import { access } from 'fs';
+import { CreateAuthDto } from './dto/create-auth.dto';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,21 +16,24 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  async signIn(email: string, password: string): Promise<{ access_token: string }> {
+  async signIn(email: string, password: string){
     // Récupération unique de l'utilisateur
     const user = await this.prisma.user.findUnique({
       where: { email },
-      select: { id: true, email: true, password: true }
+      select: { id: true, email: true, password: true, status:true }
     });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user || password!==user.password) {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
-
-    return { access_token: await this.jwtService.signAsync({ sub: user.id, email: user.email }) };
+    if(!user.status){
+      throw new UnauthorizedException('Email non vérifer démander une code de verification');
+ 
+    }
+    return { access_token : (await this.jwtService.signAsync({ sub: user.id, email: user.email })).toString()};
   }
 
-  async signUp(createUserDto: any) {
+  async signUp(createUserDto: CreateUserDto) {
     const newUser = await this.usersService.create(createUserDto);
     const code = this.generateCode();
 
@@ -53,6 +59,10 @@ export class AuthService {
     return { message: 'Email vérifié avec succès' };
   }
 
+  async requestValidationCode(email:string){
+    return this.sendValidationCode(email, "email_verification")
+  }
+
   async resetPassword(dto: ResetPasswordDto) {
     // Vérification et mise à jour du mot de passe en une seule requête
     const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
@@ -69,26 +79,30 @@ export class AuthService {
   }
 
   async requestPasswordReset(email: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-      select: { id: true, status: true }
-    });
+   return this.sendValidationCode(email, "password_reset")
+  }
+
+  private async sendValidationCode(email:string, type:string){
+    const user = await this.usersService.findEmail(email);
 
     if (!user) {
       throw new UnauthorizedException("Aucun utilisateur ne correspond à cet email");
     }
-    if (!user.status) {
-      throw new UnauthorizedException("L'email de l'utilisateur n'a pas été vérifié");
-    }
+    
 
     const code = this.generateCode();
     
     // Mise à jour ou création du code en une seule requête
-    await this.prisma.verification_codes.upsert({
-      where: { userId_type: { userId: user.id, type: 'password_reset' } },
+  const validate=  await this.prisma.verification_codes.upsert({
+      where: { userId_type: { userId: user.id, type } },
       update: { code, expiration: this.getExpiration() },
-      create: { userId: user.id, code, type: 'password_reset', expiration: this.getExpiration() }
+      create: { userId: user.id, code, type, expiration: this.getExpiration() }
     });
+
+    if (validate.type==="password_reset" && !user.status) {
+        throw new UnauthorizedException("L'email de l'utilisateur n'a pas été vérifié");
+      
+    }
 
     return { message: 'Un code de vérification a été envoyé' };
   }
