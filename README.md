@@ -23,7 +23,7 @@
 ### 1️⃣ **Cloner le projet**
 ```sh
 git clone https://github.com/souleymane19/AuthNestAPI.git
-cd auth-service
+cd AuthNestAP
 ```
 
 ### 2️⃣ **Installer les dépendances**
