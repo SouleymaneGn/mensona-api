@@ -21,8 +21,9 @@ export class AuthService {
       where: { email },
       select: { id: true, email: true, password: true, status:true }
     });
-
-    if (!user || password!==user.password) {
+    
+    ;
+    if (!user || ! await bcrypt.compare(password, user.password)) {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
     if(!user.status){
@@ -45,7 +46,7 @@ export class AuthService {
       data: { userId: newUser.id, code, type: 'email_verification', expiration: this.getExpiration() }
     });
 
-    return { message: `Le code de validation est ${code}`, data: newUser };
+    return { message: `Un code de vérification a été envoyé`, data: newUser };
   }
 
   async validateAccount(code: string) {
