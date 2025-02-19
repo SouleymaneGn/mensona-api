@@ -72,9 +72,10 @@ L'API sera disponible sur `http://localhost:3000`
   "password": "motdepasse"
 }
 ```
-🔑 Réponse : `{ "access_token": "JWT_TOKEN" }`
+🔑 Réponse : `{ "access_token": "JWT_TOKEN", data: {id:string, email:string, status:boolean} }`
 
 ---
+
 
 ### 📌 **3. Vérifier le compte**
 **POST** `/auth/validate-email`
