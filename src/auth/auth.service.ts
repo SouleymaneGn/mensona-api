@@ -4,9 +4,8 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ResetPasswordDto } from './dto/reset-password';
 import * as bcrypt from 'bcrypt';
-import { access } from 'fs';
-import { CreateAuthDto } from './dto/create-auth.dto';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { omit } from 'lodash';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +15,7 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  async signIn(email: string, password: string){
+  async signIn(email: string, password: string):Promise<{access_token:string, data:any}>{
     // Récupération unique de l'utilisateur
     const user = await this.prisma.user.findUnique({
       where: { email },
@@ -30,7 +29,11 @@ export class AuthService {
       throw new UnauthorizedException('Email non vérifer démander une code de verification');
  
     }
-    return { access_token : (await this.jwtService.signAsync({ sub: user.id, email: user.email })).toString()};
+    
+    return { 
+     access_token : (await this.jwtService.signAsync({ sub: user.id, email: user.email })).toString(),
+     data:omit(user, 'password')
+    };
   }
 
   async signUp(createUserDto: CreateUserDto) {
