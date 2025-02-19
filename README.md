@@ -36,7 +36,6 @@ Crée un fichier `.env` à la racine et ajoute :
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/authdb"
 JWT_SECRET="votre_secret"
-EXPIRE_TIME=30 # Expiration du code en minutes
 ```
 
 ### 4️⃣ **Exécuter les migrations Prisma**
