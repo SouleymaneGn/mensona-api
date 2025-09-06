@@ -9,8 +9,33 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+
+enum Role {
+  client
+  admin
+}
+
+enum TrajetStatus {
+  EN_PREPARATION
+  EN_ROUTE
+  ARRIVE
+  TERMINE
+}
+
+enum ConteneurStatus {
+  EN_CHARGEMENT
+  EN_ROUTE
+  LIVRE
+}
+
+enum ColisStatus {
+  ENREGISTRE
+  EN_TRANSIT
+  LIVRE
 }
 
 model User {
@@ -19,7 +44,13 @@ model User {
   password            String
   status              Boolean @default(false)
   verification_codes  Verification_codes[] 
+
+    // relation 1-1 vers Client (optionnelle)
+  client       Client?   @relation(fields: [clientId], references: [id])
+  clientId     BigInt?   @unique
 }
+
+
 
 
 
@@ -31,4 +62,61 @@ model Verification_codes{
   user        User    @relation(fields: [userId], references: [id])
   userId      String 
   @@unique([userId, type]) // Assure qu’un userId ne peut avoir qu’un code par type
+}
+
+
+
+
+model Client {
+  id        BigInt   @id @default(autoincrement())
+  user      User?    @relation()
+  fullName  String
+  phone     String
+  address   String
+  createdAt DateTime @default(now())
+
+  // relation 1-N -> Colis
+  colis     Colis[]
+}
+
+model Trajet {
+  id            BigInt     @id @default(autoincrement())
+  origin        String
+  destination   String
+  departureDate DateTime
+  arrivalDate   DateTime?
+  status        TrajetStatus @default(EN_PREPARATION)
+  createdAt     DateTime     @default(now())
+
+  // 1-N -> Conteneurs
+  conteneurs    Conteneur[]
+}
+
+model Conteneur {
+  id         BigInt          @id @default(autoincrement())
+  trajet     Trajet          @relation(fields: [trajetId], references: [id])
+  trajetId   BigInt
+  reference  String          @unique
+  capacityKg Int        
+  status     ConteneurStatus @default(EN_CHARGEMENT)
+  createdAt  DateTime        @default(now())
+
+  // 1-N -> Colis
+  colis      Colis[]
+}
+
+model Colis {
+  id          BigInt    @id @default(autoincrement())
+  client      Client    @relation(fields: [clientId], references: [id])
+  clientId    BigInt
+  conteneur   Conteneur @relation(fields: [conteneurId], references: [id])
+  conteneurId BigInt
+  description String
+   // poidsKg     Decimal   @db.Decimal(10,2)
+   // valeurUsd   Decimal   @db.Decimal(12,2)
+  statut      ColisStatus @default(ENREGISTRE)
+  createdAt   DateTime  @default(now())
+
+  @@index([clientId])
+  @@index([conteneurId])
 }
